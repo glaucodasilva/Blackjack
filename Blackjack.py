@@ -26,10 +26,11 @@ cartasdealer = []
 inijog = 0
 qtdcartasdealer = 0
 qtdcartajog = 1
-somacartdeeler = 0
-somacartdeelerA = 0
+somacartdealer = 0
+somacartdealerA = 0
 somacartjog = 0
 somacartjogA = 0
+fimjogada = False
 
 ############################################################# DECLARAÇÃO DE FUNÇÕES!! #############################################################
 def cls(): print("\n" * 100)
@@ -73,16 +74,15 @@ def criarbaralho():
 ###################################################################################################################################################
 
 def distribuircartas(dealer, jog):
-    global baralho, qtdcartasdealer, qtdcartajog, somacartdeeler, somacartdeelerA, somacartjog, somacartjogA
+    global baralho, qtdcartasdealer, qtdcartajog, somacartdealer, somacartdealerA, somacartjog, somacartjogA, inijog
     cls()
     print('Cartas do Dealer')
     print('')
     if dealer:
         qtdcartasdealer += 1
-        for i in range(qtdcartasdealer):
-            cartasdealer.append(random.choice(baralho))
+        cartasdealer.append(random.choice(baralho))
     imprimecartas(cartasdealer, qtdcartasdealer)
-    somacartdeeler, somacartdeelerA = somacartas(qtdcartasdealer, cartasdealer, False)
+    somacartdealer, somacartdealerA = somacartas(qtdcartasdealer, cartasdealer, False)
     print('')
     print('')
     print('')
@@ -91,42 +91,90 @@ def distribuircartas(dealer, jog):
     if jog:
         qtdcartajog += 1
         for i in range(inijog, qtdcartajog):
+            inijog += 1
             cartasjog.append(random.choice(baralho))
     imprimecartas(cartasjog, qtdcartajog)
     somacartjog, somacartjogA = somacartas(qtdcartajog, cartasjog, True)
-    resultado()
+    resultado(dealer, jog)
 
 ###################################################################################################################################################
 
-def resultado():
-    if somacartjog > 21 and somacartjogA > 21:
+def jogarnovamente():
+    while True:
         print('')
-        print('O deealer ganhou')
+        print('Deseja jogar novamente? Digite S para sim e N para não.')
+        continua = input()
+        if continua.upper() not in ('S', 'N'):
+            continue
+        elif continua == 'S':
+            cls()
+            novaaposta()
+        else:
+            fimdejogo()
+
+###################################################################################################################################################
+
+def resultado(dealer, jog):
+    global somacartjog, somacartjogA, fimjogada, qtdcartajog, qtdcartajog, qtdcartasdealer, cartasdealer
+    if qtdcartajog == 2 and 1 in cartasjog and (10 in cartasjog or 11 in cartasjog or 12 in cartasjog or 13 in cartasjog):
+        if 1 not in cartasdealer and 10 not in cartasdealer and 11 not in cartasdealer and 12 not in cartasdealer and 13 not in cartasdealer:
+            print('Blackjack! O jogador Ganhou!')
+            jogarnovamente()
+        elif qtdcartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
+            print('Isso é um empate!')
+            jogarnovamente()
+        elif qtdcartasdealer == 1:
+            fimjogada = True
+            distribuircartas(True, False)
+        else:
+            print('Blackjack! O Jogador Ganhou!')
+            jogarnovamente()
+
+    elif somacartjog > 21 and somacartjogA > 21:
         print('')
-        while True:
-            print('Deseja jogar novamente? Digite S para sim e N para não.')
-            continua = input()
-            if continua.upper() not in ('S','N'):
-                continue
-            elif continua == 'S':
-                cls()
-                novaaposta()
-            else:
-                fimdejogo()
+        print('O Jogador Estourou! O Dealer Ganhou!')
+        jogarnovamente()
+    elif dealer and fimjogada:
+        if qtdcartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
+            print('Blackjack! O Dealer Ganhou!')
+            jogarnovamente()
+        elif somacartdealer < 17 and somacartdealerA < 17:
+            distribuircartas(True, False)
+        elif 17 <= (somacartdealer and somacartdealer) <= 21 and somacartdealer > (somacartjog and somacartjogA):
+            print('')
+            print('O Dealer Ganhou')
+            jogarnovamente()
+        elif somacartdealer > 21 and somacartdealerA > 21:
+            print('')
+            print('O Dealer Estourou! O Jogador Ganhou!')
+            jogarnovamente()
     else:
         continuadobrafica()
 
 ###################################################################################################################################################
 
 def continuadobrafica():
-    global inijog, qtdcartasdealer, qtdcartajog
+    global qtdcartajog, fimjogada
     print('')
     print('')
-    print('Para Pedir mais cartas digite P, para Dobrar digite D, para Ficar digite F!')
-    escolha = input()
-    if escolha.upper() == 'P':
-        inijog = 2
+    if qtdcartajog == 2:
+        while True:
+            print('Para Pedir mais cartas digite P, para Dobrar digite D, para Ficar digite F!')
+            escolha = input().upper()
+            if escolha == 'P' or escolha == 'D' or escolha == 'F':
+                break
+    else:
+        while True:
+            print('Para Pedir mais cartas digite P, para Ficar digite F!')
+            escolha = input()
+            if escolha == 'P' or escolha == 'F':
+                break
+
+    if escolha == 'P':
         distribuircartas(False, True)
+    elif escolha == 'F':
+        fimjogada = True
+        distribuircartas(True, False)
 
 ###################################################################################################################################################
 
@@ -159,24 +207,24 @@ def imprimecartas(sortcartas, qtcartas):
 ###################################################################################################################################################
 
 def somacartas(qtdcartas, cartas, jog):
-    if qtdcartas == 2 and 1 in cartas and (10 in cartas or 11 in cartas or 12 in cartas or 13 in cartas):
-        print('Blackjack')
-        return
+
+    somacart = 0
+    somacartA = 0
+    if 1 in cartas:
+        az = True
     else:
-        somacart = 0
-        somacartA = 0
         az = False
-        for i in range(qtdcartas):
-            if 1 < cartas[i] <= 10:
-                somacart += cartas[i]
-                somacartA += cartas[i]
-            elif cartas[i] > 10:
-                somacart += 10
-                somacartA += 10
-            else:
-                somacart += 11
-                somacartA += 1
-                az = True
+    for i in range(qtdcartas):
+        if 1 < cartas[i] <= 10:
+            somacart += cartas[i]
+            somacartA += cartas[i]
+        elif cartas[i] > 10:
+            somacart += 10
+            somacartA += 10
+        else:
+            somacart += 11
+            somacartA += 1
+            az = True
     print('')
     print('')
     if jog:
@@ -189,7 +237,7 @@ def somacartas(qtdcartas, cartas, jog):
             print('Total pontos:', somacart, '/', somacartA)
         else:
             print('Total pontos:', somacart)
-    return somacart, somacartA
+    return (somacart, somacartA)
 
 ###################################################################################################################################################
 
