@@ -12,11 +12,21 @@ class sal:
         self.saldo -= aposta
         return self.saldo
 
+    def soma(self, ganhou):
+        self.ganhou = ganhou
+        self.saldo += ganhou
+        return self.saldo
+
     def aposta(self):
         return self.aposta
 
+    def dobra(self):
+        self.saldo -= self.aposta
+        self.aposta *= 2
+
 import random
 import sys
+import time
 
 ######################################################## DECLARAÇÃO DE VARIAVEIS GLOBAIS! ########################################################
 saldo = sal()
@@ -31,6 +41,8 @@ somacartdealerA = 0
 somacartjog = 0
 somacartjogA = 0
 fimjogada = False
+resultjog = 0
+dobra = False
 
 ############################################################# DECLARAÇÃO DE FUNÇÕES!! #############################################################
 def cls(): print("\n" * 100)
@@ -38,6 +50,14 @@ def cls(): print("\n" * 100)
 ###################################################################################################################################################
 
 def novaaposta():
+    global cartasjog, cartasdealer, inijog, qtdcartasdealer, qtdcartajog, fimjogada, dobra
+    fimjogada = False
+    dobra = False
+    qtdcartasdealer = 0
+    qtdcartajog = 1
+    cartasjog = []
+    cartasdealer = []
+    inijog = 0
     aposta = 0
     entrada = ''
     print('')
@@ -45,7 +65,7 @@ def novaaposta():
     print("")
     print('Para iniciar a partida digite o valor de sua aposta entre 1 e 500, são permitidos apenas números inteiros!')
     try:
-        entrada = input()
+        entrada = 10#input()
         aposta = int(round(float(entrada)))
     except:
         novaaposta()
@@ -95,7 +115,7 @@ def distribuircartas(dealer, jog):
             cartasjog.append(random.choice(baralho))
     imprimecartas(cartasjog, qtdcartajog)
     somacartjog, somacartjogA = somacartas(qtdcartajog, cartasjog, True)
-    resultado(dealer, jog)
+    resultado()
 
 ###################################################################################################################################################
 
@@ -103,8 +123,8 @@ def jogarnovamente():
     while True:
         print('')
         print('Deseja jogar novamente? Digite S para sim e N para não.')
-        continua = input()
-        if continua.upper() not in ('S', 'N'):
+        continua = input().upper()
+        if continua not in ('S', 'N'):
             continue
         elif continua == 'S':
             cls()
@@ -114,67 +134,36 @@ def jogarnovamente():
 
 ###################################################################################################################################################
 
-def resultado(dealer, jog):
-    global somacartjog, somacartjogA, fimjogada, qtdcartajog, qtdcartajog, qtdcartasdealer, cartasdealer
-    if qtdcartajog == 2 and 1 in cartasjog and (10 in cartasjog or 11 in cartasjog or 12 in cartasjog or 13 in cartasjog):
-        if 1 not in cartasdealer and 10 not in cartasdealer and 11 not in cartasdealer and 12 not in cartasdealer and 13 not in cartasdealer:
-            print('Blackjack! O jogador Ganhou!')
-            jogarnovamente()
-        elif qtdcartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
-            print('Isso é um empate!')
-            jogarnovamente()
-        elif qtdcartasdealer == 1:
-            fimjogada = True
-            distribuircartas(True, False)
-        else:
-            print('Blackjack! O Jogador Ganhou!')
-            jogarnovamente()
-
-    elif somacartjog > 21 and somacartjogA > 21:
-        print('')
-        print('O Jogador Estourou! O Dealer Ganhou!')
-        jogarnovamente()
-    elif dealer and fimjogada:
-        if qtdcartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
-            print('Blackjack! O Dealer Ganhou!')
-            jogarnovamente()
-        elif somacartdealer < 17 and somacartdealerA < 17:
-            distribuircartas(True, False)
-        elif 17 <= (somacartdealer and somacartdealer) <= 21 and somacartdealer > (somacartjog and somacartjogA):
-            print('')
-            print('O Dealer Ganhou')
-            jogarnovamente()
-        elif somacartdealer > 21 and somacartdealerA > 21:
-            print('')
-            print('O Dealer Estourou! O Jogador Ganhou!')
-            jogarnovamente()
-    else:
-        continuadobrafica()
-
-###################################################################################################################################################
-
 def continuadobrafica():
-    global qtdcartajog, fimjogada
+    global qtdcartajog, fimjogada, dobra
     print('')
     print('')
-    if qtdcartajog == 2:
-        while True:
-            print('Para Pedir mais cartas digite P, para Dobrar digite D, para Ficar digite F!')
-            escolha = input().upper()
-            if escolha == 'P' or escolha == 'D' or escolha == 'F':
-                break
-    else:
-        while True:
-            print('Para Pedir mais cartas digite P, para Ficar digite F!')
-            escolha = input()
-            if escolha == 'P' or escolha == 'F':
-                break
-
-    if escolha == 'P':
-        distribuircartas(False, True)
-    elif escolha == 'F':
+    if dobra:
         fimjogada = True
         distribuircartas(True, False)
+    else:
+        if qtdcartajog == 2:
+            while True:
+                print('Para Pedir mais cartas digite P, para Dobrar digite D, para Ficar digite F!')
+                escolha = input().upper()
+                if escolha == 'P' or escolha == 'D' or escolha == 'F':
+                    break
+        else:
+            while True:
+                print('Para Pedir mais cartas digite P, para Ficar digite F!')
+                escolha = input().upper()
+                if escolha == 'P' or escolha == 'F':
+                    break
+        if escolha == 'P':
+            distribuircartas(False, True)
+        elif escolha == 'F':
+            fimjogada = True
+            distribuircartas(True, False)
+        elif escolha == 'D':
+            saldo.dobra()
+            dobra = True
+            distribuircartas(False, True)
+
 
 ###################################################################################################################################################
 
@@ -227,16 +216,13 @@ def somacartas(qtdcartas, cartas, jog):
             az = True
     print('')
     print('')
-    if jog:
-        if az:
-            print('Aposta atual: ', saldo.aposta, '          Total pontos:', somacart, '/', somacartA)
+    if az:
+        if somacart > 21:
+            print('Pontos:', somacartA)
         else:
-            print('Aposta atual: ', saldo.aposta, '          Total pontos:', somacart)
+            print('Pontos:', somacart, '/', somacartA)
     else:
-        if az:
-            print('Total pontos:', somacart, '/', somacartA)
-        else:
-            print('Total pontos:', somacart)
+        print('Pontos:', somacart)
     return (somacart, somacartA)
 
 ###################################################################################################################################################
@@ -244,17 +230,108 @@ def somacartas(qtdcartas, cartas, jog):
 def fimdejogo():
     sys.exit()
 
+###################################################################################################################################################
+
+def empate():
+    print('')
+    print('Isso é um Empate!')
+    saldo.soma(saldo.aposta)
+    print('Saldo:', saldo.val(), '                 Aposta:', saldo.aposta, 'Pago:', saldo.aposta)
+    jogarnovamente()
+
+def dealer(estouro, black):
+    print('')
+    if estouro:
+        print('O Jogador Estourou!')
+    elif black:
+        print('Blackjack! O Dealer Ganhou!')
+    else:
+        print('O Dealer Ganhou!')
+    print('Saldo:', saldo.val(), '                 Aposta:', saldo.aposta, 'Pago: 00')
+    jogarnovamente()
+
+def jogador(estourou, black):
+    ganhou = 2 * saldo.aposta
+    print('')
+    if estourou:
+        print('O Dealer Estourou!')
+    elif black:
+        ganhou = 3 * saldo.aposta
+        print('Blackjack! O Jogador Ganhou!')
+    else:
+        print('O Jogador Ganhou!')
+    saldo.soma(ganhou)
+    print('Saldo:', saldo.val(), '                 Aposta:', saldo.aposta, 'Pago:', ganhou)
+    jogarnovamente()
+
+
+###################################################################################################################################################
+
+def resultado():
+    global somacartjog, somacartjogA, fimjogada, qtdcartajog, cartasjog, qtdcartasdealer, cartasdealer, resultjog
+    if qtdcartajog == 2 and 1 in cartasjog and (10 in cartasjog or 11 in cartasjog or 12 in cartasjog or 13 in cartasjog):
+        if qtdcartasdealer == 1 and (1 in cartasdealer or 10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
+            fimjogada = True
+            distribuircartas(True, False)
+        elif qtdcartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
+            empate()
+        else:
+            jogador(False, True)
+    if fimjogada:
+        if somacartdealer != somacartdealerA:
+            if cartasdealer == 2 and 1 in cartasdealer and (10 in cartasdealer or 11 in cartasdealer or 12 in cartasdealer or 13 in cartasdealer):
+                dealer(False, True)
+            elif somacartdealer > 21:
+                if 21 >= somacartdealerA >= 17:
+                    if somacartdealerA > resultjog:
+                        dealer(False, False)
+                    elif somacartdealerA == resultjog:
+                        empate()
+                    else:
+                        jogador(False, False)
+                elif somacartdealerA < 17:
+                    time.sleep(2)
+                    distribuircartas(True, False)
+                else:
+                    jogador(True, False)
+            elif somacartdealer >= 17:
+                    if somacartdealer > resultjog:
+                        dealer(False, False)
+                    elif somacartdealer == resultjog:
+                        empate()
+                    else:
+                        time.sleep(2)
+                        distribuircartas(True, False)
+            else:
+                time.sleep(2)
+                distribuircartas(True, False)
+        elif 21 >= somacartdealer >= 17:
+            if somacartdealer > resultjog:
+                dealer(False, False)
+            elif somacartdealer == resultjog:
+                empate()
+            else:
+                jogador(False, False)
+        elif somacartdealer < 17:
+            time.sleep(2)
+            distribuircartas(True, False)
+        else:
+            jogador(True, False)
+    else:
+        if somacartjog != somacartjogA:
+            if somacartjog <= 21:
+                resultjog = somacartjog
+            else:
+                resultjog = somacartjogA
+        elif somacartjog > 21:
+            dealer(True, False)
+        else:
+            resultjog = somacartjog
+        if resultjog == 21:
+            fimjogada = True
+            distribuircartas(True, False)
+        continuadobrafica()
 
 ################################################################ INÍCIO DO SISTEMA! ################################################################
 print('                              Bem Vindo ao Blackjack do Glauco ;D!                              ')
 novaaposta()
-
-
-
-
-
-
-
-
-
-
