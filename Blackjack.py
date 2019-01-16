@@ -65,7 +65,7 @@ def novaaposta():
     print("")
     print('Para iniciar a partida digite o valor de sua aposta entre 1 e 500, são permitidos apenas números inteiros!')
     try:
-        entrada = 10#input()
+        entrada = input()
         aposta = int(round(float(entrada)))
     except:
         novaaposta()
@@ -75,7 +75,7 @@ def novaaposta():
         saldo.menos(aposta)
         criarbaralho()
         distribuircartas(True, True)
-    elif aposta > 100 or aposta < 1:
+    elif aposta > 500 or aposta < 1:
         novaaposta()
     elif aposta > saldo.val():
         print('O valor da sua aposta não pode ultrapassar o seu saldo!')
@@ -327,9 +327,12 @@ def resultado():
             dealer(True, False)
         else:
             resultjog = somacartjog
-        if resultjog == 21:
-            fimjogada = True
-            distribuircartas(True, False)
+        if resultjog >= 21:
+            if resultjog == 21:
+                fimjogada = True
+                distribuircartas(True, False)
+            elif resultjog > 21:
+                dealer(True, False)
         continuadobrafica()
 
 ################################################################ INÍCIO DO SISTEMA! ################################################################
